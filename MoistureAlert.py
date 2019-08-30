@@ -8,13 +8,27 @@ from PCF8574 import PCF8574_GPIO
 from Adafruit_LCD1602 import Adafruit_CharLCD
 
 import smbus
+import random 
+import sys
 import time
 
-address = 0x48	# default address of PCF8591
-bus = smbus.SMBus(1) # Initializes IC Bus
+# Importing Python Device SDK for IoT Hub
+import iothub_client
+from iothub_client import IoTHubClient, IoTHubClientError, IoTHubTransportProvider, IoTHubClientResult
+from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError, DeviceMethodReturnValue
+
+# Default address of PCF8591
+address = 0x48
+
+# Initialize IC Bus
+bus = smbus.SMBus(1) 
 cmd = 0x40
 
-PCF8574_address = 0x27 # The I2C address of PCF8574T
+# Address of PCF8574T
+PCF8574_address = 0x27
+
+# Device connection string
+CONNECTION_STRING = "HostName=Learner.azure-devices.net;DeviceId=thepimistake;SharedAccessKey=TZe/FEf3cowtfxHIsI8e/I+UbNhRnmS7fl3ktlYt/L4=" 
 
 # Function Name: analogRead()
 # Function Description: Read the ADC value from the channel that was 
