@@ -4,6 +4,14 @@
 # Date: 8/13/19
 import smbus
 import time
+import random
+import config as config
+
+from iothub_client import IoTHubClient, IoTHubClientError, IoTHubTransportProvider, IoTHubClientResult
+from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError, DeviceMethodReturnValue
+from telemetry import Telemetry
+
+# Choose MQTT
 
 address = 0x48	# default address of PCF8591
 bus=smbus.SMBus(1) # Initializes IC Bus
