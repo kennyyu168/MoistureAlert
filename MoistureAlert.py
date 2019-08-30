@@ -11,24 +11,44 @@ import smbus
 import random 
 import sys
 import time
-
-# Importing Python Device SDK for IoT Hub
+import random
+import config as config
 import iothub_client
+
 from iothub_client import IoTHubClient, IoTHubClientError, IoTHubTransportProvider, IoTHubClientResult
 from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError, DeviceMethodReturnValue
+from telemetry import Telemetry
+
+# Choose MQTT as protocol
+PROTOCOL = IoTHubTransportProvider.MQTT
+MESSAGE_TIMEOUT = 10000
+
+# IoT Hub Connection String
+CONNECTION_STRING = "HostName=Learner.azure-devices.net;DeviceId=thepimistake;SharedAccessKey=TZe/FEf3cowtfxHIsI8e/I+UbNhRnmS7fl3ktlYt/L4="
+
+# Define JSON message to send to IoT Hub
+MSG_TXT = "{\"moisture\": %d}"
 
 # Default address of PCF8591
 address = 0x48
 
-# Initialize IC Bus
-bus = smbus.SMBus(1) 
+# Initializes IC Bus
+bus = smbus.SMBus(1)
 cmd = 0x40
 
-# Address of PCF8574T
+# The I2C address of PCF8574T
 PCF8574_address = 0x27
 
-# Device connection string
-CONNECTION_STRING = "HostName=Learner.azure-devices.net;DeviceId=thepimistake;SharedAccessKey=TZe/FEf3cowtfxHIsI8e/I+UbNhRnmS7fl3ktlYt/L4=" 
+# Function Name: initHub()
+# Function Description: Initialize the IoT hub
+# Parameters: None
+# Side Effects: Connects to the hub using the connection string and 
+#     clarifies protocol
+# Return Value: The client
+def initHub(): 
+	# Create an IoT Hub client
+	client - IoTHubClient( CONNECTION_STRING, PROTOCOL )
+	return client
 
 # Function Name: analogRead()
 # Function Description: Read the ADC value from the channel that was 
@@ -51,19 +71,36 @@ def readValue():
 	mcp.output( 3, 1 )
 	lcd.begin( 16, 2 )
 
-	while True:
-		# Read and print value at channel zero
-		value = analogRead( 0 )	
+	# Try to init client and send messages
+	try: 
+		client = iothub_client_init()
+		print ( "IoT device sending messages, press Ctrl+C to exit" )
 
-		# Display the value
-		lcd.setCursor( 0, 0 )
-		lcd.message( 'Moisture: %d' % ( value ) + '\n' )
-		if value > 200: 
-			lcd.message( 'Please water!' + '\n' )
-		elif value <= 200:
-			lcd.message( 'Still good :D' + '\n' )
-		time.sleep( 0.01 )
+		while True:
+			# Read and print value at channel zero
+			value = analogRead( 0 )	
 
+			# Display the value
+			lcd.setCursor( 0, 0 )
+			lcd.message( 'Moisture: %d' % ( value ) + '\n' )
+			if value > 200: 
+				lcd.message( 'Please water!' + '\n' )
+				msg_txt = MSG_TXT % ( value )
+			elif value <= 200:
+				lcd.message( 'Still good :D' + '\n' )
+				msg_txt = MSG_TXT % ( value )
+			message = IoTHubMessage( msg_txt )
+
+			# Send message
+			print ( "Sending message: %s" % message.get_string() )
+			client.send_event_async( message, 
+			    send_confirmation_callback, None)
+			time.sleep( 1 )
+
+	except IoTHubError as iothub_error:
+		print ( "Unexpected error %s from IoTHub" % iothub_error )
+		return 
+			
 # Function Name: end()
 # Function Description: Releases the bus(es) after program finishes, so they
 #     can be used again
@@ -73,6 +110,7 @@ def readValue():
 def end():
 	lcd.clear()
 	bus.close()	
+	print ( "IoTHubClient stopped" )
 
 # Create PCF8574 GPIO adapter
 try: 
@@ -83,7 +121,8 @@ except:
 
 # Create LCD passing in GPIO adapter
 lcd = Adafruit_CharLCD( pin_rs = 0, pin_e = 2, pins_db = [4,5,6,7], GPIO = mcp )
-	
+
+# Main function that calls everything
 if __name__ == '__main__':
 	try:
 		readValue()

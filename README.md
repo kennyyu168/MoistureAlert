@@ -4,4 +4,7 @@ Using a Raspberry Pi, a Capacitive Moisture Sensor, and a PCF8591T ADC, Moisture
 
 This program is written using Python and smbus.
 
-(more information coming) 
+# Incoming features
+
+- Connecting to Azure IoT Hub
+- Check for online signal before sending, otherwise save into file
