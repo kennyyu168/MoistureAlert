@@ -12,12 +12,10 @@ import random
 import sys
 import time
 import random
-import config as config
 import iothub_client
 
 from iothub_client import IoTHubClient, IoTHubClientError, IoTHubTransportProvider, IoTHubClientResult
 from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError, DeviceMethodReturnValue
-from telemetry import Telemetry
 
 # Choose MQTT as protocol
 PROTOCOL = IoTHubTransportProvider.MQTT
@@ -47,8 +45,18 @@ PCF8574_address = 0x27
 # Return Value: The client
 def initHub(): 
 	# Create an IoT Hub client
-	client - IoTHubClient( CONNECTION_STRING, PROTOCOL )
+	client = IoTHubClient( CONNECTION_STRING, PROTOCOL )
 	return client
+
+# Function Name: send_confirmation_callback()
+# Function Description: Checks for confirmation of sent message
+# Parameters: message - message to be sent
+#             result - result of whether it was sent
+#             user_context - 
+# Side Effects: Checks for successful send, and prints to console
+# Return Value: None
+def send_confirmation_callback( message, result, user_context ):
+	print ( "IoT Hub responded to message with status: %s" % (result) )
 
 # Function Name: analogRead()
 # Function Description: Read the ADC value from the channel that was 
@@ -73,7 +81,7 @@ def readValue():
 
 	# Try to init client and send messages
 	try: 
-		client = iothub_client_init()
+		client = initHub()
 		print ( "IoT device sending messages, press Ctrl+C to exit" )
 
 		while True:
