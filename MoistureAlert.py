@@ -12,6 +12,7 @@ import random
 import sys
 import time
 import random
+import csv
 import iothub_client
 
 from iothub_client import IoTHubClient, IoTHubClientError, IoTHubTransportProvider, IoTHubClientResult
@@ -88,16 +89,32 @@ def readValue():
 			# Read and print value at channel zero
 			value = analogRead( 0 )	
 
-			# Display the value
+			# Value to water or not
+			toWater = False
+
+			# Display the value and format moisture in JSON
 			lcd.setCursor( 0, 0 )
 			lcd.message( 'Moisture: %d' % ( value ) + '\n' )
 			if value > 200: 
 				lcd.message( 'Please water!' + '\n' )
 				msg_txt = MSG_TXT % ( value )
+				toWater = True
 			elif value <= 200:
 				lcd.message( 'Still good :D' + '\n' )
 				msg_txt = MSG_TXT % ( value )
+				toWater = False
 			message = IoTHubMessage( msg_txt )
+
+			# Create row to be stored
+			rowToStore = [ value, toWater ]
+			
+			# Open file and write
+			with open('waterLog.csv', 'a') as csvFile:
+				writer = csv.writer(csvFile)
+				writer.writerow(rowToStore)
+
+			# Close file after writing
+			csvFile.close()
 
 			# Send message
 			print ( "Sending message: %s" % message.get_string() )
