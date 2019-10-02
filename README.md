@@ -6,12 +6,12 @@ This program is written using Python and smbus with the RPi GPIO library. The pr
 
 As for the hardware, the capacitive moisture sensor is connected to a PCF8519T ADC, then connected to a Raspberry Pi as an I2C device. The LCD is connected to the Raspberry Pi (with a preattached ADC of its own), also as an I2C device. 
 
-# Currently broken features
+Currently broken features:
 - Sending telemetry through the Azure IoT Hub
   - This is due to my Azure account not having sufficient funds (I'm broke)
   - However, all features should work, if needed to be tested, please create your own Azure IoT Hub and replace the connection
     string with your own
 
-# Incoming features
+Incoming features:
 - Reporting data and alerts to a mobile app
 - User defined moisture levels
